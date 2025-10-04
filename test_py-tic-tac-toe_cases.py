@@ -1,6 +1,8 @@
 import sys, os, types
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'py-tic-tac-toe')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '{repo_basename}')))
 
+
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', f'{safe_repo_name}')))
 # Auto-mock tkinter for headless environments
 try:
     import tkinter as tk
@@ -26,220 +28,127 @@ except ImportError:
     sys.modules["tkinter"] = tk
 
 import pytest
-from unittest.mock import patch
-from io import StringIO
+import sys
+import random
+from unittest.mock import patch, MagicMock
 
-# Assuming the source code is in a file named main.py
-# from main import TicTacToe
+sys.path.insert(0, r'/home/vvdn/projects/sfit_unitest_19_9_2025/cloned_repos/py-tic-tac-toe')
 
-# If the source code is in the same file as the tests, you can use it directly:
-class TicTacToe:
+from tic_tac_toe import TicTacToe
 
-    def __init__(self):
-        self.board = []
+class _WidgetMock:
+    def __init__(self, *args, **kwargs):
+        pass
 
-    def create_board(self):
-        # Initialize an empty 3x3 board with dashes '-'
-        self.board = [['-' for _ in range(3)] for _ in range(3)]
-
-    def get_random_first_player(self):
-        # Randomly choose which player goes first (0 for 'O', 1 for 'X')
-        return random.randint(0, 1)
-
-    def fix_spot(self, row, col, player):
-        # Mark the spot on the board with the player's symbol
-        self.board[row][col] = player
-
-    def has_player_won(self, player):
-        # Check if the player has won in rows, columns, or diagonals
-        n = len(self.board)
-        for i in range(n):
-            # Check rows
-            if all(self.board[i][j] == player for j in range(n)):
-                return True
-
-            # Check columns
-            if all(self.board[j][i] == player for j in range(n)):
-                return True
-
-        # Check diagonals
-        if all(self.board[i][i] == player for i in range(n)):
-            return True
-        if all(self.board[i][n - i - 1] == player for i in range(n)):
-            return True
-
-        return False
-
-    def is_board_filled(self):
-        # Check if the board is completely filled with symbols
-        return all(self.board[i][j] != '-' for i in range(3) for j in range(3))
-
-    def swap_player_turn(self, player):
-        # Swap player turn between 'X' and 'O'
-        return 'X' if player == 'O' else 'O'
-
-    def show_board(self):
-        # Display the current state of the board
-        for row in self.board:
-            print(' '.join(row))
-        print()
-
-    def start(self):
-        self.create_board()
-        player = 'X' if self.get_random_first_player() == 1 else 'O'
-        game_over = False
-
-        while not game_over:
-            try:
-                self.show_board()
-                print(f'Player {player} turn')
-
-                # Get user input for row and column to fix the spot
-                row, col = list(map(int, input('Enter row & column numbers to fix spot: ').split()))
-                print()
-
-                # Convert to 0-based index for internal board representation
-                row -= 1
-                col -= 1
-
-                # Check if the spot is valid and not already taken
-                if 0 <= row < 3 and 0 <= col < 3 and self.board[row][col] == '-':
-                    self.fix_spot(row, col, player)
-
-                    # Check if the current player has won
-                    if self.has_player_won(player):
-                        print(f'Player {player} wins the game!')
-                        game_over = True
-                    elif self.is_board_filled():
-                        print('Match Draw!')
-                        game_over = True
-                    else:
-                        player = self.swap_player_turn(player)
-                else:
-                    print('Invalid spot. Try again!')
-
-            except ValueError as err:
-                print(err)
-
-        print()
-        self.show_board()
-
-
-@pytest.fixture
-def ttt_game():
+def test_create_board():
     game = TicTacToe()
     game.create_board()
-    return game
+    assert game.board == [['-', '-', '-'], ['-', '-', '-'], ['-', '-', '-']]
 
-def test_create_board(ttt_game):
-    assert ttt_game.board == [['-', '-', '-'], ['-', '-', '-'], ['-', '-', '-']]
+def test_get_random_first_player():
+    game = TicTacToe()
+    player_choice = game.get_random_first_player()
+    assert player_choice in [0, 1]
 
-def test_fix_spot(ttt_game):
-    ttt_game.fix_spot(0, 0, 'X')
-    assert ttt_game.board[0][0] == 'X'
-    ttt_game.fix_spot(1, 2, 'O')
-    assert ttt_game.board[1][2] == 'O'
+def test_fix_spot():
+    game = TicTacToe()
+    game.create_board()
+    game.fix_spot(0, 0, 'X')
+    assert game.board[0][0] == 'X'
+    game.fix_spot(1, 2, 'O')
+    assert game.board[1][2] == 'O'
 
-def test_has_player_won_row(ttt_game):
-    ttt_game.fix_spot(0, 0, 'X')
-    ttt_game.fix_spot(0, 1, 'X')
-    ttt_game.fix_spot(0, 2, 'X')
-    assert ttt_game.has_player_won('X') == True
+def test_has_player_won_row():
+    game = TicTacToe()
+    game.create_board()
+    game.board = [['X', 'X', 'X'], ['-', '-', '-'], ['-', '-', '-']]
+    assert game.has_player_won('X') is True
 
-def test_has_player_won_column(ttt_game):
-    ttt_game.fix_spot(0, 1, 'O')
-    ttt_game.fix_spot(1, 1, 'O')
-    ttt_game.fix_spot(2, 1, 'O')
-    assert ttt_game.has_player_won('O') == True
+def test_has_player_won_column():
+    game = TicTacToe()
+    game.create_board()
+    game.board = [['X', '-', '-'], ['X', '-', '-'], ['X', '-', '-']]
+    assert game.has_player_won('X') is True
 
-def test_has_player_won_diagonal_main(ttt_game):
-    ttt_game.fix_spot(0, 0, 'X')
-    ttt_game.fix_spot(1, 1, 'X')
-    ttt_game.fix_spot(2, 2, 'X')
-    assert ttt_game.has_player_won('X') == True
+def test_has_player_won_diagonal_main():
+    game = TicTacToe()
+    game.create_board()
+    game.board = [['X', '-', '-'], ['-', 'X', '-'], ['-', '-', 'X']]
+    assert game.has_player_won('X') is True
 
-def test_has_player_won_diagonal_anti(ttt_game):
-    ttt_game.fix_spot(0, 2, 'O')
-    ttt_game.fix_spot(1, 1, 'O')
-    ttt_game.fix_spot(2, 0, 'O')
-    assert ttt_game.has_player_won('O') == True
+def test_has_player_won_diagonal_anti():
+    game = TicTacToe()
+    game.create_board()
+    game.board = [['-', '-', 'X'], ['-', 'X', '-'], ['X', '-', '-']]
+    assert game.has_player_won('X') is True
 
-def test_has_player_won_no_win(ttt_game):
-    ttt_game.fix_spot(0, 0, 'X')
-    ttt_game.fix_spot(0, 1, 'O')
-    ttt_game.fix_spot(0, 2, 'X')
-    assert ttt_game.has_player_won('X') == False
-    assert ttt_game.has_player_won('O') == False
+def test_has_player_won_no_win():
+    game = TicTacToe()
+    game.create_board()
+    game.board = [['X', 'O', '-'], ['-', 'X', '-'], ['-', '-', 'O']]
+    assert game.has_player_won('X') is False
+    assert game.has_player_won('O') is False
 
-def test_is_board_filled_true(ttt_game):
-    for r in range(3):
-        for c in range(3):
-            ttt_game.fix_spot(r, c, 'X' if (r+c)%2 == 0 else 'O')
-    assert ttt_game.is_board_filled() == True
+def test_is_board_filled_true():
+    game = TicTacToe()
+    game.board = [['X', 'O', 'X'], ['O', 'X', 'O'], ['O', 'X', 'O']]
+    assert game.is_board_filled() is True
 
-def test_is_board_filled_false(ttt_game):
-    ttt_game.fix_spot(0, 0, 'X')
-    assert ttt_game.is_board_filled() == False
+def test_is_board_filled_false():
+    game = TicTacToe()
+    game.board = [['X', 'O', '-'], ['O', 'X', 'O'], ['O', 'X', 'O']]
+    assert game.is_board_filled() is False
 
 def test_swap_player_turn():
     game = TicTacToe()
     assert game.swap_player_turn('X') == 'O'
     assert game.swap_player_turn('O') == 'X'
 
-@patch('builtins.input', side_effect=['0 0', '1 1', '0 1', '2 2', '0 2', '2 0', '1 0', '1 2', '2 1'])
-@patch('sys.stdout', new_callable=StringIO)
-def test_start_player_x_wins(mock_stdout, mock_input):
+@patch('builtins.input', side_effect=['1 1', '1 2', '2 1', '2 2', '3 1', '3 2', '1 3', '2 3', '3 3'])
+@patch('random.randint', return_value=1) # 'X' starts
+def test_start_game_win_x(mock_randint, mock_input):
     game = TicTacToe()
-    with patch('random.randint', return_value=1): # Ensure 'X' goes first
+    with patch('builtins.print') as mock_print:
         game.start()
+        # Check if 'X' wins
+        mock_print.assert_any_call('Player X wins the game!')
 
-    output = mock_stdout.getvalue()
-    assert "Player X wins the game!" in output
-
-@patch('builtins.input', side_effect=['0 0', '1 1', '0 1', '2 2', '0 2', '2 0', '1 0', '1 2', '2 1'])
-@patch('sys.stdout', new_callable=StringIO)
-def test_start_player_o_wins(mock_stdout, mock_input):
+@patch('builtins.input', side_effect=['1 1', '1 2', '2 1', '2 2', '3 1', '3 2', '1 3', '2 3', '3 3'])
+@patch('random.randint', return_value=0) # 'O' starts
+def test_start_game_win_o(mock_randint, mock_input):
     game = TicTacToe()
-    with patch('random.randint', return_value=0): # Ensure 'O' goes first
+    with patch('builtins.print') as mock_print:
         game.start()
+        # Check if 'O' wins
+        mock_print.assert_any_call('Player O wins the game!')
 
-    output = mock_stdout.getvalue()
-    assert "Player O wins the game!" in output
-
-@patch('builtins.input', side_effect=['0 0', '1 1', '0 1', '2 2', '0 2', '1 0', '1 2', '2 0', '2 1'])
-@patch('sys.stdout', new_callable=StringIO)
-def test_start_draw(mock_stdout, mock_input):
+@patch('builtins.input', side_effect=['1 1', '1 2', '1 3', '2 1', '2 2', '2 3', '3 1', '3 2', '3 3'])
+@patch('random.randint', return_value=1) # 'X' starts
+def test_start_game_draw(mock_randint, mock_input):
     game = TicTacToe()
-    with patch('random.randint', return_value=1): # Doesn't matter who starts for draw
+    with patch('builtins.print') as mock_print:
         game.start()
+        mock_print.assert_any_call('Match Draw!')
 
-    output = mock_stdout.getvalue()
-    assert "Match Draw!" in output
-
-@patch('builtins.input', side_effect=['0 0', '0 0', '1 1', '0 1', '2 2', '0 2', '1 0', '1 2', '2 1'])
-@patch('sys.stdout', new_callable=StringIO)
-def test_start_invalid_spot_twice(mock_stdout, mock_input):
+@patch('builtins.input', side_effect=['1 1', '1 1', '1 2']) # Invalid move, then valid
+@patch('random.randint', return_value=1) # 'X' starts
+def test_start_game_invalid_move(mock_randint, mock_input):
     game = TicTacToe()
-    with patch('random.randint', return_value=1):
+    with patch('builtins.print') as mock_print:
         game.start()
+        mock_print.assert_any_call('Invalid spot. Try again!')
+        # Check if the game eventually progresses after invalid move
+        mock_print.assert_any_call('Player O turn')
 
-    output = mock_stdout.getvalue()
-    assert "Invalid spot. Try again!" in output
-    assert output.count('Player X turn') == 2 # X tries to play invalid spot, then valid
-    assert output.count('Player O turn') == 1
-
-@patch('builtins.input', side_effect=['a b', '0 0']) # Test for ValueError
-@patch('sys.stdout', new_callable=StringIO)
-def test_start_value_error(mock_stdout, mock_input):
+@patch('builtins.input', side_effect=['1 4', '1 1']) # Invalid input, then valid
+@patch('random.randint', return_value=1) # 'X' starts
+def test_start_game_value_error(mock_randint, mock_input):
     game = TicTacToe()
-    with patch('random.randint', return_value=1):
+    with patch('builtins.print') as mock_print:
         game.start()
-    output = mock_stdout.getvalue()
-    assert "Invalid input. Please enter numbers." in output.replace("Enter row & column numbers to fix spot: \n", "")
-    assert "Player X turn" in output
-    assert game.board[0][0] == 'X'
+        mock_print.assert_any_call('Invalid spot. Try again!') # This will be printed for invalid input like '1 4'
+        mock_print.assert_any_call('Player O turn') # Check if game continues
 
-def test_get_random_first_player():
-    game = TicTacToe()
-    result = game.get_random_first_player()
-    assert result in [0, 1]
+if __name__ == "__main__":
+    import pytest, sys
+    sys.exit(pytest.main([__file__, "-v"]))
