@@ -146,8 +146,9 @@ def test_start_game_value_error(mock_randint, mock_input):
     game = TicTacToe()
     with patch('builtins.print') as mock_print:
         game.start()
-        mock_print.assert_any_call('Invalid spot. Try again!') # This will be printed for invalid input like '1 4'
-        mock_print.assert_any_call('Player O turn') # Check if game continues
+        mock_print.assert_any_call('Invalid spot. Try again!')
+        mock_print.assert_any_call('Player O turn')
+
 
 if __name__ == "__main__":
     import pytest, sys
