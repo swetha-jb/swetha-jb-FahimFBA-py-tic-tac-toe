@@ -137,16 +137,25 @@ def test_start_game_invalid_move(mock_randint, mock_input):
     with patch('builtins.print') as mock_print:
         game.start()
         mock_print.assert_any_call('Invalid spot. Try again!')
-        # Check if the game eventually progresses after invalid move
+        # Check if the game eventually progresses after an invalid move
         mock_print.assert_any_call('Player O turn')
 
-@patch('builtins.input', side_effect=['1 4', '1 1']) # Invalid input, then valid
+@patch('builtins.input', side_effect=['1 4', '1 1']) # Out of bounds, then valid
 @patch('random.randint', return_value=1) # 'X' starts
-def test_start_game_value_error(mock_randint, mock_input):
+def test_start_game_out_of_bounds_move(mock_randint, mock_input):
     game = TicTacToe()
     with patch('builtins.print') as mock_print:
         game.start()
         mock_print.assert_any_call('Invalid spot. Try again!')
+        mock_print.assert_any_call('Player O turn')
+
+@patch('builtins.input', side_effect=['a b', '1 1']) # Non-integer input, then valid
+@patch('random.randint', return_value=1) # 'X' starts
+def test_start_game_non_integer_input(mock_randint, mock_input):
+    game = TicTacToe()
+    with patch('builtins.print') as mock_print:
+        game.start()
+        mock_print.assert_any_call("invalid literal for int() with base 10: 'a'")
         mock_print.assert_any_call('Player O turn')
 
 
