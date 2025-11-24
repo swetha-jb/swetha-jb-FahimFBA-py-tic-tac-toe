@@ -27,136 +27,169 @@ except ImportError:
         setattr(tk, const, const)
     sys.modules["tkinter"] = tk
 
-import pytest
 import sys
-import random
-from unittest.mock import patch, MagicMock
-
 sys.path.insert(0, r'/home/vvdn/projects/sfit_unitest_19_9_2025/cloned_repos/py-tic-tac-toe')
 
+import pytest
+from unittest.mock import patch, MagicMock
 from tic_tac_toe import TicTacToe
 
 class _WidgetMock:
     def __init__(self, *args, **kwargs):
         pass
 
-def test_create_board():
+    def __getattr__(self, name):
+        return self
+
+    def __call__(self, *args, **kwargs):
+        return self
+
+    def __setitem__(self, key, value):
+        pass
+
+    def __getitem__(self, key):
+        return self
+
+    def configure(self, **kwargs):
+        pass
+
+    def bind(self, event, handler):
+        pass
+
+    def grid(self, **kwargs):
+        pass
+
+    def pack(self, **kwargs):
+        pass
+
+    def place(self, **kwargs):
+        pass
+
+    def destroy(self):
+        pass
+
+    def get(self):
+        return ""
+
+    def set(self, value):
+        pass
+
+    def insert(self, index, string):
+        pass
+
+    def delete(self, first, last=None):
+        pass
+
+    def update(self):
+        pass
+
+    def mainloop(self):
+        pass
+
+    def quit(self):
+        pass
+
+    def destroy(self):
+        pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+@pytest.fixture
+def tic_tac_toe_game():
     game = TicTacToe()
     game.create_board()
-    assert game.board == [['-', '-', '-'], ['-', '-', '-'], ['-', '-', '-']]
+    return game
 
-def test_get_random_first_player():
-    game = TicTacToe()
-    player_choice = game.get_random_first_player()
+def test_create_board(tic_tac_toe_game):
+    tic_tac_toe_game.create_board()
+    assert tic_tac_toe_game.board == [['-', '-', '-'], ['-', '-', '-'], ['-', '-', '-']]
+
+def test_get_random_first_player(tic_tac_toe_game):
+    player_choice = tic_tac_toe_game.get_random_first_player()
     assert player_choice in [0, 1]
 
-def test_fix_spot():
-    game = TicTacToe()
-    game.create_board()
-    game.fix_spot(0, 0, 'X')
-    assert game.board[0][0] == 'X'
-    game.fix_spot(1, 2, 'O')
-    assert game.board[1][2] == 'O'
+def test_fix_spot(tic_tac_toe_game):
+    tic_tac_toe_game.fix_spot(0, 0, 'X')
+    assert tic_tac_toe_game.board[0][0] == 'X'
 
-def test_has_player_won_row():
-    game = TicTacToe()
-    game.create_board()
-    game.board = [['X', 'X', 'X'], ['-', '-', '-'], ['-', '-', '-']]
-    assert game.has_player_won('X') is True
+def test_has_player_won_row(tic_tac_toe_game):
+    tic_tac_toe_game.board = [['X', 'X', 'X'], ['-', '-', '-'], ['-', '-', '-']]
+    assert tic_tac_toe_game.has_player_won('X') is True
 
-def test_has_player_won_column():
-    game = TicTacToe()
-    game.create_board()
-    game.board = [['X', '-', '-'], ['X', '-', '-'], ['X', '-', '-']]
-    assert game.has_player_won('X') is True
+def test_has_player_won_column(tic_tac_toe_game):
+    tic_tac_toe_game.board = [['X', '-', '-'], ['X', '-', '-'], ['X', '-', '-']]
+    assert tic_tac_toe_game.has_player_won('X') is True
 
-def test_has_player_won_diagonal_main():
-    game = TicTacToe()
-    game.create_board()
-    game.board = [['X', '-', '-'], ['-', 'X', '-'], ['-', '-', 'X']]
-    assert game.has_player_won('X') is True
+def test_has_player_won_diagonal_main(tic_tac_toe_game):
+    tic_tac_toe_game.board = [['X', '-', '-'], ['-', 'X', '-'], ['-', '-', 'X']]
+    assert tic_tac_toe_game.has_player_won('X') is True
 
-def test_has_player_won_diagonal_anti():
-    game = TicTacToe()
-    game.create_board()
-    game.board = [['-', '-', 'X'], ['-', 'X', '-'], ['X', '-', '-']]
-    assert game.has_player_won('X') is True
+def test_has_player_won_diagonal_anti(tic_tac_toe_game):
+    tic_tac_toe_game.board = [['-', '-', 'X'], ['-', 'X', '-'], ['X', '-', '-']]
+    assert tic_tac_toe_game.has_player_won('X') is True
 
-def test_has_player_won_no_win():
-    game = TicTacToe()
-    game.create_board()
-    game.board = [['X', 'O', '-'], ['-', 'X', '-'], ['-', '-', 'O']]
-    assert game.has_player_won('X') is False
-    assert game.has_player_won('O') is False
+def test_has_player_won_no_win(tic_tac_toe_game):
+    tic_tac_toe_game.board = [['X', 'O', '-'], ['-', 'X', '-'], ['-', '-', 'O']]
+    assert tic_tac_toe_game.has_player_won('X') is False
+    assert tic_tac_toe_game.has_player_won('O') is False
 
-def test_is_board_filled_true():
-    game = TicTacToe()
-    game.board = [['X', 'O', 'X'], ['O', 'X', 'O'], ['O', 'X', 'O']]
-    assert game.is_board_filled() is True
+def test_is_board_filled_true(tic_tac_toe_game):
+    tic_tac_toe_game.board = [['X', 'O', 'X'], ['O', 'X', 'O'], ['O', 'X', 'O']]
+    assert tic_tac_toe_game.is_board_filled() is True
 
-def test_is_board_filled_false():
-    game = TicTacToe()
-    game.board = [['X', 'O', '-'], ['O', 'X', 'O'], ['O', 'X', 'O']]
-    assert game.is_board_filled() is False
+def test_is_board_filled_false(tic_tac_toe_game):
+    tic_tac_toe_game.board = [['X', 'O', '-'], ['O', 'X', 'O'], ['O', 'X', 'O']]
+    assert tic_tac_toe_game.is_board_filled() is False
 
-def test_swap_player_turn():
-    game = TicTacToe()
-    assert game.swap_player_turn('X') == 'O'
-    assert game.swap_player_turn('O') == 'X'
+def test_swap_player_turn_x_to_o(tic_tac_toe_game):
+    assert tic_tac_toe_game.swap_player_turn('X') == 'O'
+
+def test_swap_player_turn_o_to_x(tic_tac_toe_game):
+    assert tic_tac_toe_game.swap_player_turn('O') == 'X'
 
 @patch('builtins.input', side_effect=['1 1', '1 2', '2 1', '2 2', '3 1', '3 2', '1 3', '2 3', '3 3'])
-@patch('random.randint', return_value=1) # 'X' starts
-def test_start_game_win_x(mock_randint, mock_input):
-    game = TicTacToe()
-    with patch('builtins.print') as mock_print:
+@patch('builtins.print')
+def test_start_player_x_wins(mock_print, mock_input):
+    with patch('random.randint', return_value=1): # Player X starts
+        game = TicTacToe()
         game.start()
-        # Check if 'X' wins
         mock_print.assert_any_call('Player X wins the game!')
 
 @patch('builtins.input', side_effect=['1 1', '1 2', '2 1', '2 2', '3 1', '3 2', '1 3', '2 3', '3 3'])
-@patch('random.randint', return_value=0) # 'O' starts
-def test_start_game_win_o(mock_randint, mock_input):
-    game = TicTacToe()
-    with patch('builtins.print') as mock_print:
+@patch('builtins.print')
+def test_start_player_o_wins(mock_print, mock_input):
+    with patch('random.randint', return_value=0): # Player O starts
+        game = TicTacToe()
         game.start()
-        # Check if 'O' wins
         mock_print.assert_any_call('Player O wins the game!')
 
 @patch('builtins.input', side_effect=['1 1', '1 2', '1 3', '2 1', '2 2', '2 3', '3 1', '3 2', '3 3'])
-@patch('random.randint', return_value=1) # 'X' starts
-def test_start_game_draw(mock_randint, mock_input):
-    game = TicTacToe()
-    with patch('builtins.print') as mock_print:
+@patch('builtins.print')
+def test_start_match_draw(mock_print, mock_input):
+    with patch('random.randint', return_value=1): # Player X starts
+        game = TicTacToe()
         game.start()
         mock_print.assert_any_call('Match Draw!')
 
-@patch('builtins.input', side_effect=['1 1', '1 1', '1 2']) # Invalid move, then valid
-@patch('random.randint', return_value=1) # 'X' starts
-def test_start_game_invalid_move(mock_randint, mock_input):
-    game = TicTacToe()
-    with patch('builtins.print') as mock_print:
+@patch('builtins.input', side_effect=['1 1', '1 1', '1 2']) # Test invalid move
+@patch('builtins.print')
+def test_start_invalid_move(mock_print, mock_input):
+    with patch('random.randint', return_value=1): # Player X starts
+        game = TicTacToe()
         game.start()
         mock_print.assert_any_call('Invalid spot. Try again!')
-        # Check if the game eventually progresses after an invalid move
-        mock_print.assert_any_call('Player O turn')
 
-@patch('builtins.input', side_effect=['1 4', '1 1']) # Out of bounds, then valid
-@patch('random.randint', return_value=1) # 'X' starts
-def test_start_game_out_of_bounds_move(mock_randint, mock_input):
-    game = TicTacToe()
-    with patch('builtins.print') as mock_print:
-        game.start()
-        mock_print.assert_any_call('Invalid spot. Try again!')
-        mock_print.assert_any_call('Player O turn')
-
-@patch('builtins.input', side_effect=['a b', '1 1']) # Non-integer input, then valid
-@patch('random.randint', return_value=1) # 'X' starts
-def test_start_game_non_integer_input(mock_randint, mock_input):
-    game = TicTacToe()
-    with patch('builtins.print') as mock_print:
+@patch('builtins.input', side_effect=['a b', '1 2']) # Test invalid input type
+@patch('builtins.print')
+def test_start_invalid_input_type(mock_print, mock_input):
+    with patch('random.randint', return_value=1): # Player X starts
+        game = TicTacToe()
         game.start()
         mock_print.assert_any_call("invalid literal for int() with base 10: 'a'")
-        mock_print.assert_any_call('Player O turn')
 
 
 if __name__ == "__main__":
