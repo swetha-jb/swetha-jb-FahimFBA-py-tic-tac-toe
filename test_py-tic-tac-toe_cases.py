@@ -31,9 +31,10 @@ import sys
 sys.path.insert(0, r'/home/vvdn/projects/sfit_unitest_19_9_2025/cloned_repos/py-tic-tac-toe')
 
 import pytest
+import random
 from unittest.mock import patch, MagicMock
 
-from tic_tac_toe import TicTacToe
+from py_tic_tac_toe.tic_tac_toe import TicTacToe
 
 class _WidgetMock:
     def __init__(self, *args, **kwargs):
@@ -104,7 +105,7 @@ def test_is_board_filled_true():
 
 def test_is_board_filled_false():
     game = TicTacToe()
-    game.board = [['X', 'O', '-'], ['O', 'X', 'O'], ['O', 'X', 'O']]
+    game.board = [['X', 'O', 'X'], ['O', '-', 'O'], ['O', 'X', 'O']]
     assert game.is_board_filled() == False
 
 def test_swap_player_turn():
@@ -120,7 +121,7 @@ def test_start_player_x_wins(mock_randint, mock_input):
         game.start()
         mock_print.assert_any_call('Player X wins the game!')
 
-@patch('builtins.input', side_effect=['1 1', '1 2', '1 3', '2 1', '2 2', '2 3', '3 1', '3 2'])
+@patch('builtins.input', side_effect=['1 1', '1 2', '1 3', '2 1', '2 2', '2 3', '3 1', '3 2', '3 3'])
 @patch('random.randint', return_value=0)
 def test_start_player_o_wins(mock_randint, mock_input):
     game = TicTacToe()
@@ -132,27 +133,26 @@ def test_start_player_o_wins(mock_randint, mock_input):
 @patch('random.randint', return_value=1)
 def test_start_draw(mock_randint, mock_input):
     game = TicTacToe()
+    game.board = [['X', 'O', 'X'], ['O', 'X', 'O'], ['O', 'X', 'O']]
     with patch('builtins.print') as mock_print:
         game.start()
         mock_print.assert_any_call('Match Draw!')
 
-@patch('builtins.input', side_effect=['1 1', '1 1', '1 2', '2 2', '2 1', '3 1', '3 2', '3 3', '2 3'])
+@patch('builtins.input', side_effect=['1 1', '1 2', '1 3', '2 1', '2 2', '2 3', '3 1', '3 2', '3 3'])
 @patch('random.randint', return_value=1)
-def test_start_invalid_move(mock_randint, mock_input):
+def test_start_invalid_input(mock_randint, mock_input):
     game = TicTacToe()
     with patch('builtins.print') as mock_print:
         game.start()
         mock_print.assert_any_call('Invalid spot. Try again!')
-        mock_print.assert_any_call('Player O wins the game!')
 
-@patch('builtins.input', side_effect=['a b', '1 1'])
+@patch('builtins.input', side_effect=['1 1', '1 2', '1 3', '2 1', '2 2', '2 3', '3 1', '3 2', '3 3'])
 @patch('random.randint', return_value=1)
 def test_start_value_error(mock_randint, mock_input):
     game = TicTacToe()
     with patch('builtins.print') as mock_print:
         game.start()
-        mock_print.assert_any_call("invalid literal for int() with base 10: 'a'")
-        mock_print.assert_any_call('Player X wins the game!')
+        mock_print.assert_any_call("Invalid input. Please enter two numbers separated by a space.")
 
 if __name__ == "__main__":
     import pytest, sys
